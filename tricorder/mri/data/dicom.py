@@ -1,7 +1,7 @@
 import SimpleITK as sitk
 import pydicom
 import numpy as np
-from sitk import FileSave as stikSave
+from .sitk import FileSave as stikSave
 import os
 
 def ReadSeries(folder_path, returnIDs=False):

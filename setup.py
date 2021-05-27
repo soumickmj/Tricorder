@@ -22,7 +22,7 @@ tests_requirements = [
 
 setuptools.setup(
     name="tricorder", 
-    version="0.0.0.1",
+    version="0.0.0.3",
     author="Soumick Chatterjee",
     author_email="soumick.chatterjee@ovgu.de",
     description="Collection of small but useful tools for MRI PyTorch",

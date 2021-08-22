@@ -79,10 +79,12 @@ def FileRead(file_path, return_data=True, return_ds=False):
     else:
         return ds.pixel_array, ds
 
-def toNIFTI(dicom_path, nifti_path, isSeries=True):
+def toNIFTI(dicom_path, nifti_path, isSeries=True, nifti_file_name=None):
     if isSeries:
         imgs, IDs = ReadSeries(dicom_path, returnIDs=True)
     else:
         imgs, IDs = ReadDICOMDIR(dicom_path, returnIDs=True)
     for i, (im, id) in enumerate(zip(imgs, IDs)):
+        if nifti_file_name is not None:
+            id = nifti_file_name + "_" + str(i)
         stikSave(im, f"{nifti_path}/{id}.nii.gz")

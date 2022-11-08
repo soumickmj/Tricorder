@@ -61,8 +61,5 @@ def fnorm_np(x):
     return x/np.abs(x).max()
 
 def fnorm(x):
-    if type(x) is torch.Tensor:
-        return fnorm_pyt(x=x)
-    else:
-        return fnorm_np(x=x)
+    return fnorm_pyt(x=x) if type(x) is torch.Tensor else fnorm_np(x=x)
 #########

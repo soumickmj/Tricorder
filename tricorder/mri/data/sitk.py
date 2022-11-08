@@ -6,10 +6,7 @@ def FileRead(file_path, return_sitkImg = False, ImageIO=None):
     reader.SetFileName(file_path)
     image = reader.Execute()
     arr = sitk.GetArrayFromImage(image)
-    if not return_sitkImg:
-        return arr
-    else:
-        return arr, image
+    return (arr, image) if return_sitkImg else arr
 
 def FileSave(data, file_path):
     if type(data) is not sitk.Image: data = sitk.GetImageFromArray(data)

@@ -20,10 +20,7 @@ def ReadSeries(folder_path, returnIDs=False):
         except:
             pass
     imgs = np.array(imgs)
-    if not returnIDs:
-        return imgs
-    else:
-        return imgs, sIDs
+    return (imgs, sIDs) if returnIDs else imgs
 
 def ReadDICOMDIR(dicomdir_path, returnIDs=False):
     ds = pydicom.dcmread(dicomdir_path)
@@ -54,7 +51,7 @@ def ReadDICOMDIR(dicomdir_path, returnIDs=False):
                 elems = [ii["ReferencedFileID"] for ii in images] # Each IMAGE contains a relative file path to the root directory
                 paths = [[ee.value] if ee.VM == 1 else ee.value for ee in elems] # Make sure the relative file path is always a list of str
                 paths = [os.path.join(os.path.dirname(dicomdir_path), os.sep.join(p)) for p in paths]
-                
+
                 try:
                     reader = sitk.ImageSeriesReader()
                     reader.SetFileNames(paths)
@@ -65,10 +62,7 @@ def ReadDICOMDIR(dicomdir_path, returnIDs=False):
                     pass
 
     imgs = np.array(imgs)
-    if not returnIDs:
-        return imgs
-    else:
-        return imgs, sIDs
+    return (imgs, sIDs) if returnIDs else imgs
 
 def FileRead(file_path, return_data=True, return_ds=False):
     ds = pydicom.dcmread(file_path)
@@ -86,5 +80,5 @@ def toNIFTI(dicom_path, nifti_path, isSeries=True, nifti_file_name=None):
         imgs, IDs = ReadDICOMDIR(dicom_path, returnIDs=True)
     for i, (im, id) in enumerate(zip(imgs, IDs)):
         if nifti_file_name is not None:
-            id = nifti_file_name + "_" + str(i)
+            id = f"{nifti_file_name}_{str(i)}"
         stikSave(im, f"{nifti_path}/{id}.nii.gz")

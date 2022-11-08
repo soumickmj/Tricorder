@@ -132,12 +132,10 @@ class EvaluateSegmentationWrapper:
         else:
             data = xmltodict.parse(ET.tostring(ET.parse(tmpXML.name).getroot(), encoding='utf8', method='xml'))
             tmpXML.close()
-        
-        results = {}
-        for (k,v) in data["measurement"]["metrics"].items():
-            results[k] = float(v["@value"])
 
-        if return_rawdict:
-            return results, data
-        else:
-            return results
+        results = {
+            k: float(v["@value"])
+            for k, v in data["measurement"]["metrics"].items()
+        }
+
+        return (results, data) if return_rawdict else results

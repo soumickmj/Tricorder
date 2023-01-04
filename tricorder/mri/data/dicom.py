@@ -5,24 +5,51 @@ import numpy as np
 from .sitk import FileSave as stikSave
 import os
 
-def ReadSeries(folder_path, returnIDs=False, series_ids=None):
+def __tags2dict(reader, sliceID=0, taginits2ignore=[]):
+    tag_dict = {}
+    if type(reader) is sitk.ImageSeriesReader: #If it's a series, then the sliceID is needed. Default is 0
+        for k in reader.GetMetaDataKeys(sliceID):
+            if k.split("|")[0] not in taginits2ignore:
+                tag_dict[k] = reader.GetMetaData(sliceID,k)
+    else:
+        if type(reader) is sitk.ImageSeriesReader:
+            for k in reader.GetMetaDataKeys():
+                if k.split("|")[0] not in taginits2ignore:
+                    tag_dict[k] = reader.GetMetaData(k)
+    return tag_dict
+
+def ReadSeries(folder_path, returnIDs=False, return_meta=False, series_ids=None, series2array=True, taginits2ignore=[]):
     if not bool(series_ids):
         reader = sitk.ImageSeriesReader()
         series_ids = reader.GetGDCMSeriesIDs(folder_path)
     if not isinstance(series_ids, list):    
         series_ids = [series_ids]
     imgs = []
+    metas = []
     sIDs = []
     for sid in series_ids:
         with contextlib.suppress(Exception):
             reader = sitk.ImageSeriesReader()
             dicom_names = reader.GetGDCMSeriesFileNames(folder_path, sid)
             reader.SetFileNames(dicom_names)
+            if return_meta:
+                reader.MetaDataDictionaryArrayUpdateOn()
+                reader.LoadPrivateTagsOn()
             image = reader.Execute()
             imgs.append(sitk.GetArrayFromImage(image))
             sIDs.append(sid)
-    imgs = np.array(imgs)
-    return (imgs, sIDs) if returnIDs else imgs
+            if return_meta:
+                metas.append(__tags2dict(reader, taginits2ignore=taginits2ignore))
+    if series2array:
+        imgs = np.array(imgs)
+    if return_meta and returnIDs:
+        return imgs, sIDs, metas
+    elif return_meta:
+        return imgs, metas
+    elif returnIDs:
+        return imgs, sIDs
+    else:
+        return imgs
 
 def ReadDICOMDIR(dicomdir_path, returnIDs=False):
     ds = pydicom.dcmread(dicomdir_path)

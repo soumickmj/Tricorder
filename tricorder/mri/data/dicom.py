@@ -28,6 +28,8 @@ def ReadSeries(folder_path, returnIDs=False, return_meta=False, series_ids=None,
     metas = []
     sIDs = []
     for sid in series_ids:
+        #read the dicom series
+
         with contextlib.suppress(Exception):
             reader = sitk.ImageSeriesReader()
             dicom_names = reader.GetGDCMSeriesFileNames(folder_path, sid)
@@ -40,6 +42,49 @@ def ReadSeries(folder_path, returnIDs=False, return_meta=False, series_ids=None,
             sIDs.append(sid)
             if return_meta:
                 metas.append(__tags2dict(reader, taginits2ignore=taginits2ignore))
+
+    if series2array:
+        imgs = np.array(imgs)
+    if return_meta and returnIDs:
+        return imgs, sIDs, metas
+    elif return_meta:
+        return imgs, metas
+    elif returnIDs:
+        return imgs, sIDs
+    else:
+        return imgs
+
+def ReadSeriesV2(folder_path, returnIDs=False, return_meta=False, series_ids=None, series2array=True, taginits2ignore=[]):
+    #This function is identical to ReadSeries, but it uses pydicom instead of SimpleITK. But they do not return the same results (TODO!)
+    if not bool(series_ids):
+        reader = sitk.ImageSeriesReader()
+        series_ids = reader.GetGDCMSeriesIDs(folder_path)
+    if not isinstance(series_ids, list):    
+        series_ids = [series_ids]
+    imgs = []
+    metas = []
+    sIDs = []
+    for sid in series_ids:
+        #read the dicom series
+
+        with contextlib.suppress(Exception):
+            dicom_names = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith('.dcm') or f.endswith('.IMA')]
+            dicom_names = sorted(dicom_names, key=lambda x: pydicom.dcmread(x).AcquisitionTime)
+            image = []
+            meta = []
+            for d in dicom_names:
+                ds = pydicom.dcmread(d)
+                # check if the sid matches with the one provided
+                if ds.SeriesInstanceUID == sid:
+                    if return_meta:
+                        headers = {elem: getattr(ds, elem) for elem in ds.dir() if elem != "PixelData"}
+                        meta.append(headers)
+                    image.append(ds.pixel_array)
+            imgs.append(np.stack(image))
+            sIDs.append(sid)
+            if return_meta:
+                metas.append(meta[0]) #TODO: make is possible to choose the slice to return the meta data, currently only the first one
+
     if series2array:
         imgs = np.array(imgs)
     if return_meta and returnIDs:

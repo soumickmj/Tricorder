@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "tricorder"
+version = "0.1.0"
+description = "A collection of small frequently used tools updated regularly, focusing on MRI and PyTorch"
+authors = ["Soumick Chatterjee, PhD <contact@soumick.com>"]
+license = "MIT license"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+torch = {version = "^2.7.1", source = "pytorch"}
+torchvision = {version = "^0.22.1", source = "pytorch"}
+torchaudio = {version = "^2.7.1", source = "pytorch"}
+xmltodict = "^0.14.2"
+pydicom = "^3.0.1"
+nibabel = "^5.3.2"
+simpleitk = "^2.5.2"
+pytorch-complex = "^0.2.0"
+
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu118"
+priority = "explicit"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
